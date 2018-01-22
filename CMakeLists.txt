@@ -97,6 +97,7 @@ if (MSVC)
   add_definitions(/wd4267)
   # TODO(jtattermusch): needed to build boringssl with VS2017, revisit later
   add_definitions(/wd4987 /wd4774 /wd4819 /wd4996 /wd4619)
+  add_definitions(/MP)
 endif()
 
 if (gRPC_USE_PROTO_LITE)

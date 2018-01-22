@@ -18,6 +18,8 @@ dist/
 py27/
 py3[0-9]*/
 
+.build/
+
 # Node installation output
 node_modules
 src/node/extension_binary/

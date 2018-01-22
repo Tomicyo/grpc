@@ -1,0 +1,20 @@
+environment:
+  VS150COMNTOOLS: C:/Program Files (x86)/Microsoft Visual Studio/2017/Community/Common7/Tools/
+  NASM_URL: http://www.nasm.us/pub/nasm/releasebuilds/2.13.01/win64/nasm-2.13.01-win64.zip
+  matrix:
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+    
+before_build:
+  - git submodule update --init --recursive 
+  - cd \
+  - appveyor DownloadFile "%NASM_URL%" -FileName "c:\nasm.zip"
+  - 7z x "nasm.zip" > nul
+  - move nasm-* NASM
+  - set PATH=%PATH%;c:\NASM;
+  - nasm -v
+
+build_script: 
+  - python build.py
+
+artifacts:
+  - path: build/third_party_clibs_windows.zip
