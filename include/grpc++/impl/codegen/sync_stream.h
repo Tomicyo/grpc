@@ -931,4 +931,6 @@ class ServerSplitStreamer final
 
 }  // namespace grpc
 
+#undef GetCurrentTime
+
 #endif  // GRPCXX_IMPL_CODEGEN_SYNC_STREAM_H

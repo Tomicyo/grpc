@@ -120,6 +120,8 @@ endif()
 
 if(_gRPC_PLATFORM_MAC)
   set(_gRPC_ALLTARGETS_LIBRARIES ${CMAKE_DL_LIBS} m pthread)
+elseif(ANDROID)
+  set(_gRPC_ALLTARGETS_LIBRARIES ${CMAKE_DL_LIBS} m log)
 elseif(UNIX)
   set(_gRPC_ALLTARGETS_LIBRARIES ${CMAKE_DL_LIBS} rt m pthread)
 endif()
@@ -163,13 +165,13 @@ function(protobuf_generate_grpc_cpp)
              "${_gRPC_PROTO_GENS_DIR}/${RELFIL_WE}_mock.grpc.pb.h"
              "${_gRPC_PROTO_GENS_DIR}/${RELFIL_WE}.pb.cc"
              "${_gRPC_PROTO_GENS_DIR}/${RELFIL_WE}.pb.h"
-      COMMAND ${_gRPC_PROTOBUF_PROTOC_EXECUTABLE}
+      COMMAND protoc
       ARGS --grpc_out=generate_mock_code=true:${_gRPC_PROTO_GENS_DIR}
            --cpp_out=${_gRPC_PROTO_GENS_DIR}
-           --plugin=protoc-gen-grpc=$<TARGET_FILE:grpc_cpp_plugin>
+           --plugin=protoc-gen-grpc=G:/android_profiler_qt_lib/build/x64/grpc_cpp_plugin.exe
            ${_protobuf_include_path}
            ${REL_FIL}
-      DEPENDS ${ABS_FIL} ${_gRPC_PROTOBUF_PROTOC} grpc_cpp_plugin
+      #DEPENDS ${ABS_FIL} ${_gRPC_PROTOBUF_PROTOC} grpc_cpp_plugin
       WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
       COMMENT "Running gRPC C++ protocol buffer compiler on ${FIL}"
       VERBATIM)
@@ -9976,6 +9978,8 @@ target_link_libraries(grpc_cli
 
 endif (gRPC_BUILD_TESTS)
 
+if(NOT ANDROID)
+
 add_executable(grpc_cpp_plugin
   src/compiler/cpp_plugin.cc
 )
@@ -10212,6 +10216,8 @@ if (gRPC_INSTALL)
     ARCHIVE DESTINATION ${gRPC_INSTALL_LIBDIR}
   )
 endif()
+
+endif(NOT ANDROID)
 
 if (gRPC_BUILD_TESTS)
 
