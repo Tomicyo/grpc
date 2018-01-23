@@ -37,6 +37,7 @@ set(gRPC_INSTALL_CMAKEDIR "${CMAKE_INSTALL_PREFIX}/lib/cmake/${PACKAGE_NAME}" CA
 
 # Options
 option(gRPC_BUILD_TESTS "Build tests" OFF)
+option(gRPC_BUILD_REFLECTION "Build reflection" OFF)
 
 set(gRPC_INSTALL_default ON)
 if (NOT CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
@@ -73,6 +74,8 @@ set_property(CACHE gRPC_BENCHMARK_PROVIDER PROPERTY STRINGS "module" "package")
 
 set(gRPC_USE_PROTO_LITE OFF CACHE BOOL "Use the protobuf-lite library")
 
+message(STATUS "need install -> ${gRPC_INSTALL}, use proto lite -> ${gRPC_USE_PROTO_LITE}")
+
 if(UNIX)
   if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
     set(_gRPC_PLATFORM_LINUX ON)
@@ -89,6 +92,14 @@ endif()
 set(CMAKE_POSITION_INDEPENDENT_CODE TRUE)
 
 if (MSVC)
+  if("kaleido3d" STREQUAL "${gRPC_PROVIDER}")
+    include(.build/dependency/third_party_clibs.cmake)
+    include(.build/dependency/protobuf.cmake)    
+    set(_gRPC_SSL_LIBRARIES crypto ssl)
+    set(_gRPC_PROTOBUF_LIBRARIES protobuf libprotoc)
+    set(_gRPC_ZLIB_LIBRARIES zlib)
+    set(_gRPC_CARES_LIBRARIES c-ares) 
+  endif()
   include(cmake/msvc_static_runtime.cmake)
   add_definitions(-D_WIN32_WINNT=0x600 -D_SCL_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_WARNINGS -D_WINSOCK_DEPRECATED_NO_WARNINGS)
   # needed to compile protobuf
@@ -166,10 +177,10 @@ function(protobuf_generate_grpc_cpp)
              "${_gRPC_PROTO_GENS_DIR}/${RELFIL_WE}_mock.grpc.pb.h"
              "${_gRPC_PROTO_GENS_DIR}/${RELFIL_WE}.pb.cc"
              "${_gRPC_PROTO_GENS_DIR}/${RELFIL_WE}.pb.h"
-      COMMAND protoc
+      COMMAND ${_gRPC_PROTOBUF_PROTOC_EXECUTABLE}
       ARGS --grpc_out=generate_mock_code=true:${_gRPC_PROTO_GENS_DIR}
            --cpp_out=${_gRPC_PROTO_GENS_DIR}
-           --plugin=protoc-gen-grpc=G:/android_profiler_qt_lib/build/x64/grpc_cpp_plugin.exe
+           --plugin=protoc-gen-grpc=$<TARGET_FILE:grpc_cpp_plugin>
            ${_protobuf_include_path}
            ${REL_FIL}
       #DEPENDS ${ABS_FIL} ${_gRPC_PROTOBUF_PROTOC} grpc_cpp_plugin
@@ -3070,7 +3081,7 @@ if (gRPC_INSTALL)
   )
 endif()
 
-
+if(gRPC_BUILD_REFLECTION)
 add_library(grpc++_error_details
   ${_gRPC_PROTO_GENS_DIR}/src/proto/grpc/status/status.pb.cc
   ${_gRPC_PROTO_GENS_DIR}/src/proto/grpc/status/status.grpc.pb.cc
@@ -3123,7 +3134,6 @@ foreach(_hdr
   )
 endforeach()
 
-
 if (gRPC_INSTALL)
   install(TARGETS grpc++_error_details EXPORT gRPCTargets
     RUNTIME DESTINATION ${gRPC_INSTALL_BINDIR}
@@ -3131,8 +3141,9 @@ if (gRPC_INSTALL)
     ARCHIVE DESTINATION ${gRPC_INSTALL_LIBDIR}
   )
 endif()
+endif(gRPC_BUILD_REFLECTION)
 
-if (gRPC_BUILD_TESTS)
+if (gRPC_BUILD_TESTS AND gRPC_BUILD_REFLECTION)
 
 add_library(grpc++_proto_reflection_desc_db
   test/cpp/util/proto_reflection_descriptor_database.cc
@@ -3190,7 +3201,9 @@ foreach(_hdr
   )
 endforeach()
 
-endif (gRPC_BUILD_TESTS)
+endif (gRPC_BUILD_TESTS AND gRPC_BUILD_REFLECTION)
+
+if(gRPC_BUILD_REFLECTION)
 
 add_library(grpc++_reflection
   src/cpp/ext/proto_server_reflection.cc
@@ -3253,6 +3266,8 @@ if (gRPC_INSTALL)
     ARCHIVE DESTINATION ${gRPC_INSTALL_LIBDIR}
   )
 endif()
+
+endif(gRPC_BUILD_REFLECTION)
 
 if (gRPC_BUILD_TESTS)
 
