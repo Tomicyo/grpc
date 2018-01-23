@@ -6,13 +6,11 @@ environment:
     
 before_build:
   - git submodule update --init --recursive 
-  - cd \
   - appveyor DownloadFile "%NASM_URL%" -FileName "c:\nasm.zip"
-  - 7z x "nasm.zip" > nul
+  - 7z x "c:\nasm.zip" -oc:\
   - move nasm-* NASM
   - set PATH=%PATH%;c:\NASM;
   - nasm -v
-  - cd $APPVEYOR_BUILD_FOLDER
 
 build_script: 
   - python build.py
