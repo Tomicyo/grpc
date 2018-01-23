@@ -12,6 +12,7 @@ before_build:
   - move nasm-* NASM
   - set PATH=%PATH%;c:\NASM;
   - nasm -v
+  - cd $APPVEYOR_BUILD_FOLDER
 
 build_script: 
   - python build.py
