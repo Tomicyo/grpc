@@ -416,7 +416,8 @@ pk_config = [
 
 def build_win64(src):
     ins = os.path.join(src, '.build', 'artifacts_mini')
-    artifacts_dir = os.path.join(src, 'output')
+    artifacts_dir = os.path.join(src, 'output', '__tmp')
+    real_dir = os.path.join(src, 'output')
     build_mini_x64_with_k3d('debug', src)
     build_mini_x64_with_k3d('release', src)
     #build_x64('release', src)
@@ -425,7 +426,7 @@ def build_win64(src):
     copy_files_by_ext(os.path.join(ins, 'win64_release', 'lib'), '.lib', os.path.join(artifacts_dir, 'lib', 'win64_vc150r'))
     copy_files_by_ext(os.path.join(ins, 'win64_release', 'bin'), 'grpc_cpp_plugin.exe', os.path.join(artifacts_dir, 'bin', 'win64_vc150r'))
     gen_cmake_package(os.path.join(artifacts_dir, 'grpc.cmake'), pk_config)
-    archive_name = os.path.join(artifacts_dir, 'grpc_windows.zip')
+    archive_name = os.path.join(real_dir, 'grpc_windows.zip')
     zipf = zipfile.ZipFile(archive_name, 'w', zipfile.ZIP_DEFLATED)
     zipdir(artifacts_dir, zipf)
     zipf.close()
